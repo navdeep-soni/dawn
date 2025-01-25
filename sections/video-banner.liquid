@@ -1,3 +1,30 @@
+{% javascript %}
+document.addEventListener('DOMContentLoaded', function() {
+  const videoBanner = document.querySelector('.video-banner__video');
+  
+  if (videoBanner) {
+    // Ensure video plays on load
+    videoBanner.addEventListener('loadedmetadata', function() {
+      // Check if the video is an HLS stream
+      if (videoBanner.canPlayType('application/x-mpegURL') === '') {
+        // If browser doesn't support HLS natively, you might need to use a library like hls.js
+        console.log('HLS streaming may not be supported');
+      }
+      
+      // Attempt to play
+      videoBanner.play().catch(error => {
+        console.log('Autoplay was prevented:', error);
+      });
+    });
+
+    // Ensure video properties
+    videoBanner.loop = true;
+    videoBanner.muted = true;
+    videoBanner.playsInline = true;
+  }
+});
+{% endjavascript %}
+
 {% schema %}
 {
   "name": "Video Banner",
@@ -5,7 +32,12 @@
     {
       "type": "video",
       "id": "video",
-      "label": "Video"
+      "label": "Desktop Video"
+    },
+    {
+      "type": "video",
+      "id": "mobile_video",
+      "label": "Mobile Video (Optional)"
     },
     {
       "type": "image_picker",
@@ -71,19 +103,5 @@
 {% stylesheet %}
 /* Styles have been moved to video-banner.css */
 {% endstylesheet %}
-
-{% javascript %}
-document.addEventListener('DOMContentLoaded', function() {
-  const videoBanner = document.querySelector('.video-banner__video');
-  
-  // Ensure video loops and autoplays
-  if (videoBanner) {
-    videoBanner.loop = true;
-    videoBanner.muted = true;
-    videoBanner.autoplay = true;
-    videoBanner.playsInline = true;
-  }
-});
-{% endjavascript %}
 
 {% render 'video-banner-content' %}
