@@ -1,0 +1,43 @@
+{% liquid 
+    assign video_url = section.settings.video | default: blank
+    assign cover_image = section.settings.cover_image | default: blank
+  %}
+  
+  <div class="video-banner">
+    {% if video_url %}
+      <video 
+        class="video-banner__video" 
+        playsinline 
+        autoplay 
+        muted 
+        loop 
+        poster="{{ cover_image | image_url: 'master' }}"
+      >
+        {{ video_url }}
+      </video>
+    {% elsif cover_image %}
+      {{ cover_image | image_url: width: 2000 | image_tag: 
+        class: 'video-banner__video',
+        loading: 'lazy',
+        alt: cover_image.alt | escape
+      }}
+    {% endif %}
+  
+    <div 
+      class="video-banner__overlay" 
+      style="
+        background-color: {{ section.settings.overlay_color }};
+        opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+      "
+    ></div>
+  
+    <div class="video-banner__content">
+      {% if section.settings.title != blank %}
+        <h1 class="video-banner__title">{{ section.settings.title }}</h1>
+      {% endif %}
+      
+      {% if section.settings.description != blank %}
+        <p class="video-banner__description">{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
+  </div>
