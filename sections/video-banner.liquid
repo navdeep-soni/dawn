@@ -1,95 +1,213 @@
-{% javascript %}
-document.addEventListener('DOMContentLoaded', function() {
-  const videoBanner = document.querySelector('.video-banner__video');
-  
-  if (videoBanner) {
-    // Ensure video plays on load
-    videoBanner.addEventListener('loadedmetadata', function() {
-      // Check if the video is an HLS stream
-      if (videoBanner.canPlayType('application/x-mpegURL') === '') {
-        // If browser doesn't support HLS natively, you might need to use a library like hls.js
-        console.log('HLS streaming may not be supported');
-      }
-      
-      // Attempt to play
-      videoBanner.play().catch(error => {
-        console.log('Autoplay was prevented:', error);
-      });
-    });
+{% comment %} Video Banner Section {% endcomment %}
+{{ 'video-banner.css' | asset_url | stylesheet_tag }}
 
-    // Ensure video properties
-    videoBanner.loop = true;
-    videoBanner.muted = true;
-    videoBanner.playsInline = true;
-  }
-});
-{% endjavascript %}
+{%- liquid
+  assign video_id = section.settings.video.id | default: section.settings.video_url.id
+  assign video_alt = section.settings.video.alt | default: section.settings.description
+  assign alt = 'sections.video.load_video' | t: description: video_alt | escape
+  assign poster = section.settings.video.preview_image | default: section.settings.cover_image
+
+  if section.settings.video != null
+    assign ratio_diff = section.settings.video.aspect_ratio | minus: poster.aspect_ratio | abs
+    if ratio_diff < 0.01 and ratio_diff > 0
+      assign fix_ratio = true
+    endif
+  endif
+-%}
+
+{%- capture sizes -%}
+  100vw
+{%- endcapture -%}
+
+<div class="video-banner color-{{ section.settings.color_scheme }} gradient">
+  <div class="video-banner__content">
+    <div class="video-banner__text-overlay">
+      <h2 class="video-banner__title {{ section.settings.title_size }}">
+        {{ section.settings.title }}
+      </h2>
+      <p class="video-banner__subtitle {{ section.settings.subtitle_size }}">
+        {{ section.settings.subtitle }}
+      </p>
+      <div class="video-banner__cta-buttons">
+        <a href="{{ section.settings.button_1_link }}" class="video-banner__cta-button video-banner__cta-button--1">
+          <span class="underline">{{ section.settings.button_1_text }}</span>
+        </a>
+        <a href="{{ section.settings.button_2_link }}" class="video-banner__cta-button video-banner__cta-button--2">
+          <span class="underline">{{ section.settings.button_2_text }}</span>
+        </a>
+      </div>
+    </div>
+
+    <deferred-media
+      class="video-banner__media deferred-media gradient global-media-settings global-media-settings--full-width{% if fix_ratio %} media-fit-cover{% endif %}"
+      data-media-id="{{ video_id }}"
+      {% if poster != null %}
+        style="--ratio-percent: {{ 1 | divided_by: poster.aspect_ratio | times: 100 }}%;"
+      {% endif %}
+    >
+      <button
+        id="Deferred-Poster-Modal-{{ video_id }}"
+        class="video-banner__poster media deferred-media__poster media--landscape"
+        type="button"
+        aria-label="{{ alt }}"
+      >
+        {%- if poster != null -%}
+          {{
+            poster
+            | image_url: width: 3840
+            | image_tag: sizes: sizes, widths: '375, 750, 1100, 1500, 1780, 2000, 3000, 3840', alt: alt
+          }}
+        {%- else -%}
+          {{ 'hero-apparel-3' | placeholder_svg_tag: 'placeholder-svg placeholder' }}
+        {%- endif -%}
+        <span class="deferred-media__poster-button motion-reduce">
+          <span class="svg-wrapper">
+            {{- 'icon-play.svg' | inline_asset_content -}}
+          </span>
+        </span>
+      </button>
+      <template>
+        {%- if section.settings.video == null and section.settings.video_url != null -%}
+          {%- liquid
+            assign loop = ''
+            if section.settings.enable_video_looping
+              assign loop = '&loop=1&playlist=' | append: video_id
+            endif
+          -%}
+          {%- if section.settings.video_url.type == 'youtube' -%}
+            <iframe
+              src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay=1{{ loop }}"
+              class="js-youtube"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="{{ section.settings.description | escape }}"
+            ></iframe>
+          {%- else -%}
+            <iframe
+              src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1{{ loop }}"
+              class="js-vimeo"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="{{ section.settings.description | escape }}"
+            ></iframe>
+          {%- endif -%}
+        {%- else -%}
+          {{
+            section.settings.video
+            | video_tag:
+              image_size: '1100x',
+              autoplay: true,
+              loop: section.settings.enable_video_looping,
+              controls: true,
+              muted: false
+          }}
+        {%- endif -%}
+      </template>
+    </deferred-media>
+  </div>
+</div>
 
 {% schema %}
 {
   "name": "Video Banner",
+  "tag": "section",
+  "class": "section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Video Settings"
+    },
     {
       "type": "video",
       "id": "video",
-      "label": "Desktop Video"
+      "label": "Video"
     },
     {
-      "type": "video",
-      "id": "mobile_video",
-      "label": "Mobile Video (Optional)"
+      "type": "video_url",
+      "id": "video_url",
+      "accept": ["youtube", "vimeo"],
+      "label": "Video URL",
+      "info": "Add a YouTube or Vimeo video"
     },
     {
-      "type": "image_picker",
-      "id": "cover_image",
-      "label": "Cover Image"
+      "type": "checkbox",
+      "id": "enable_video_looping",
+      "label": "Enable Video Looping",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Overlay Text"
     },
     {
       "type": "text",
       "id": "title",
       "label": "Title",
-      "default": "Video Banner"
-    },
-    {
-      "type": "textarea",
-      "id": "description",
-      "label": "Description"
+      "default": "Video Banner Title"
     },
     {
       "type": "select",
-      "id": "text_alignment",
-      "label": "Text Alignment",
+      "id": "title_size",
       "options": [
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        }
+        {"value": "h2", "label": "Medium"},
+        {"value": "h1", "label": "Large"},
+        {"value": "h0", "label": "Extra Large"}
       ],
-      "default": "center"
+      "default": "h1",
+      "label": "Title Size"
     },
     {
-      "type": "color",
-      "id": "overlay_color",
-      "label": "Overlay Color",
-      "default": "#000000"
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Video Banner Subtitle"
     },
     {
-      "type": "range",
-      "id": "overlay_opacity",
-      "min": 0,
-      "max": 100,
-      "step": 10,
-      "unit": "%",
-      "label": "Overlay Opacity",
-      "default": 50
+      "type": "select",
+      "id": "subtitle_size",
+      "options": [
+        {"value": "h3", "label": "Small"},
+        {"value": "h2", "label": "Medium"},
+        {"value": "h1", "label": "Large"}
+      ],
+      "default": "h2",
+      "label": "Subtitle Size"
+    },
+    {
+      "type": "header",
+      "content": "CTA Buttons"
+    },
+    {
+      "type": "text",
+      "id": "button_1_text",
+      "label": "First Button Text",
+      "default": "First Button"
+    },
+    {
+      "type": "url",
+      "id": "button_1_link",
+      "label": "First Button Link"
+    },
+    {
+      "type": "text",
+      "id": "button_2_text",
+      "label": "Second Button Text",
+      "default": "Second Button"
+    },
+    {
+      "type": "url",
+      "id": "button_2_link",
+      "label": "Second Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Color and Style"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
     }
   ],
   "presets": [
@@ -99,9 +217,3 @@ document.addEventListener('DOMContentLoaded', function() {
   ]
 }
 {% endschema %}
-
-{% stylesheet %}
-/* Styles have been moved to video-banner.css */
-{% endstylesheet %}
-
-{% render 'video-banner-content' %}

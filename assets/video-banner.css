@@ -5,60 +5,86 @@
   overflow: hidden;
 }
 
-.video-banner__video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  transform: translateX(-50%) translateY(-50%);
-  z-index: 1;
-  object-fit: cover;
+.video-banner__content {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
-.video-banner__overlay {
+.video-banner__media {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2;
+  z-index: 1;
 }
 
-.video-banner__content {
-  position: relative;
-  z-index: 3;
+.video-banner__text-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
   color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  padding: 2rem;
+  z-index: 2;
+  width: 80%;
 }
 
 .video-banner__title {
-  font-size: 2.5rem;
   margin-bottom: 1rem;
-  line-height: 1.2;
+  opacity: 0.9;
 }
 
-.video-banner__description {
-  font-size: 1.2rem;
-  line-height: 1.5;
+.video-banner__subtitle {
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
+.video-banner__cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.video-banner__cta-button {
+  background-color: transparent;
+  border: 2px solid white;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.video-banner__cta-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.video-banner__cta-button .underline {
+  text-decoration: underline;
+}
+
+.video-banner .deferred-media__poster-button {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media screen and (max-width: 768px) {
-  .video-banner {
-    height: 60vh;
+  .video-banner__text-overlay {
+    width: 90%;
   }
 
-  .video-banner__title {
-    font-size: 1.8rem;
+  .video-banner__cta-buttons {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .video-banner__description {
-    font-size: 1rem;
+
+  .video-banner__cta-button {
+    margin-bottom: 1rem;
   }
 }
