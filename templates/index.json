@@ -201,7 +201,7 @@
     "video-banner": {
       "type": "video-banner",
       "settings": {
-        "video_url": "https://au.representclo.com/cdn/shop/videos/c/vp/ae98d0301c8a43148aa892cdb55de447/ae98d0301c8a43148aa892cdb55de447.HD-1080p-7.2Mbps-41389340.mp4",
+        "video_url": "",
         "overlay_text": "Welcome to Our Store",
         "overlay_text_color": "#ffffff",
         "height": "500px"
