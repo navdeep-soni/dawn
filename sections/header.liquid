@@ -70,6 +70,9 @@
   }
   .section-opacity { 
     background-color: rgba(var(--header-background-color-rgb), {{ opacity_value | times: 0.01 | default: 1 }});
+    position: fixed;
+    width: 100%;
+    top: 0;
   }  
 
   @media screen and (min-width: 750px) {
